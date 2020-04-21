@@ -103,7 +103,7 @@ class Soppelbot(Client):
 			room_number = int(message_list[1])
 			old_resident = current_residents[room_number-1]
 			current_residents[room_number-1] = 'away'
-			self.send(Message(text="Room number " + str(room_number) + " is now set as away. See you next time " + old_resident + "!"))
+			self.send(Message(text="Room number " + str(room_number) + " is now set as away. See you next time " + old_resident + "! " + random.choice(list_of_emojis)))
 		
 		if(message_list[0].decode('utf-8').lower() == "print" and message_list[1].decode('utf-8').lower() == "all" and message_list[2].decode('utf-8').lower() == "rooms"):
 			self.reactToMessage(message_object.uid, MessageReaction.HEART)
@@ -184,11 +184,11 @@ def updateWashingWeek():
 #Main Loop
 
 #schedule.every().day.at("13:00").do(updateSoppelDag)
-schedule.every(0.1).minutes.do(updateSoppelDag)
+#schedule.every(0.1).minutes.do(updateSoppelDag)
 #schedule.every(0.1).minutes.do(updateWashingWeek)
 
-#schedule.every().sunday.at("10:00").do(updateWashingWeek)
-#schedule.every().day.at("13:00").do(updateSoppelDag)
+schedule.every().sunday.at("10:00").do(updateWashingWeek)
+schedule.every().day.at("12:00").do(updateSoppelDag)
 
 
 while(True):
