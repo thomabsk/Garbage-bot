@@ -80,37 +80,37 @@ class Soppelbot(Client):
 			try:
 				room_number = int(message_list[-1])
 				if(room_number > number_of_rooms):
-					self.send(Message(text="There aren't that many rooms in this collective"))
+					self.send(Message(text="There aren't that many rooms in this collective"), thread_id=thread_id, thread_type=thread_type)
 					return
 			except ValueError:
-				self.send(Message(text="Wrong syntax: add <name> <room number>"))
+				self.send(Message(text="Wrong syntax: add <name> <room number>"), thread_id=thread_id, thread_type=thread_type)
 				return
 			
 			if(message_list[1].isdigit()):
-				self.send(Message(text="It has to be a name not a number. Syntax: add <name> <room number>"))
+				self.send(Message(text="It has to be a name not a number. Syntax: add <name> <room number>"), thread_id=thread_id, thread_type=thread_type)
 				return
 			room_number = int(message_list[-1])
 			name = " "
 			name = name.join(message_list[1:-1]).decode('utf-8', 'ignore')
 			if(current_residents[room_number-1] == 'away'):
 				current_residents[room_number-1] = name.title()
-				self.send(Message(text="Welcome " + current_residents[room_number-1] + "! " + random.choice(list_of_emojis)))
+				self.send(Message(text="Welcome " + current_residents[room_number-1] + "! " + random.choice(list_of_emojis)),  thread_id=thread_id, thread_type=thread_type)
 				print(current_residents)
 			else:
-				self.send(Message(text="That room is already occupied by: " + current_residents[room_number-1]))
+				self.send(Message(text="That room is already occupied by: " + current_residents[room_number-1]),  thread_id=thread_id, thread_type=thread_type)
 		if(message_list[0].decode('utf-8').lower() == "remove" and len(message_list) == 2):
 			self.reactToMessage(message_object.uid, MessageReaction.HEART)
 			room_number = int(message_list[1])
 			old_resident = current_residents[room_number-1]
 			current_residents[room_number-1] = 'away'
-			self.send(Message(text="Room number " + str(room_number) + " is now set as away. See you next time " + old_resident + "! " + random.choice(list_of_emojis)))
+			self.send(Message(text="Room number " + str(room_number) + " is now set as away. See you next time " + old_resident + "! " + random.choice(list_of_emojis)),  thread_id=thread_id, thread_type=thread_type)
 		
 		if(message_list[0].decode('utf-8').lower() == "print" and message_list[1].decode('utf-8').lower() == "all" and message_list[2].decode('utf-8').lower() == "rooms"):
 			self.reactToMessage(message_object.uid, MessageReaction.HEART)
 			final_text = ""
 			for a in range(len(current_residents)):
 				final_text += "| " + str(a+1) + " - " + current_residents[a] + "\n"
-			self.send(Message(text=final_text))
+			self.send(Message(text=final_text), thread_id=thread_id, thread_type=thread_type)
 		
 		if(message_list[0].decode('utf-8').lower() == "pls" and message_list[1].decode('utf-8').lower() == "poelser"):
 			self.reactToMessage(message_object.uid, MessageReaction.LOVE)
@@ -138,7 +138,7 @@ class Soppelbot(Client):
 client = Soppelbot('soppelbot@gmail.com', 'Soppel123',)
 thread_id_own = client.uid
 thread_type_own = ThreadType.USER
-client.setDefaultThread(thread_id, thread_type)
+#client.setDefaultThread(thread_id, thread_type)
 
 def updateSoppelDag():
 	global day_counter
