@@ -7,14 +7,28 @@ import time
 import os
 import random
 import datetime
+import password
 from fbchat import log, Client
 from fbchat.models import *
-#client = Client('soppelbot@gmail.com', 'Soppel123') 
 
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+my_file = os.path.join(THIS_FOLDER, 'pos.txt')
+my_polse = os.path.join(THIS_FOLDER, 'polser.PNG')
+
+
+#Different often used global variables
 Room_position = 12
 day_counter = 2
-
+days_between_each_trash_day = 3
 Washing_week_position = 7
+
+current_residents = ["Jonas","Hanne","Kristianne","Sabine","Inga","away","Thomas","away","Jostein","away","away","Sivert","Benjamin","away","away"]
+number_of_rooms = len(current_residents)
+
+
+#Thread to post Garbage/Washing updates in
+main_thread_id = "2604038489700339" #Kollektivchat
+main_thread_type = ThreadType.GROUP
 
 
 list_of_msgs_part_1 = [u'It\'s that time of month ',
@@ -34,46 +48,31 @@ u', the bags with the trash, you know what to do ',
 u', it smells in the kitchen, take out those bags ',
 u', would you be so polite as to take those bags of waste and toss them in the containers outside? ']
 
-list_of_thread_colours = [ThreadColor.BILOBA_FLOWER, ThreadColor.BRIGHT_TURQUOISE, ThreadColor.DARK_TANGERINE, ThreadColor.GOLDEN_POPPY]
+list_of_thread_colours = [ThreadColor.RUBY]
 
 list_of_emojis = [u'🤣', u'😇', u'🤭', u'😬', u'😷', u'🤯', u'🥙', u'🍲', u'🦄',u'🥵',u'🥴',u'🤠',u'🤓',u'😎',u'😱',u'🤬',u'💩',u'👺',u'👻',u'👽',u'💘',u'💦',u'🤙',u'👊',u'👀']
 
-THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
-my_file = os.path.join(THIS_FOLDER, 'pos.txt')
-my_polse = os.path.join(THIS_FOLDER, 'polser.PNG')
 
-current_residents = ["Jonas","Hanne","Kristianne","Sabine","Inga","away","Thomas","away","Jostein","away","away","Sivert","Benjamin","away","away"]
-number_of_rooms = len(current_residents)
-daysBetweenEachMsg = 3
-thread_id = "2604038489700339"
-thread_type = ThreadType.GROUP
 
+
+#Extra used for debugging:
 #thread_id_own = client.uid
 #thread_type_own = ThreadType.USER
 
-#Soppelbot = Thread(thread_type_own, thread_id_own)
-Kollektivet = Thread(thread_type, thread_id)
-pos = 0
-#client.setDefaultThread(thread_id_own, thread_type_own)
 
-#users = client.fetchAllUsersFromThreads((client.fetchThreadList(offset=None, limit=2, thread_location=ThreadLocation.INBOX, before=None)))
-#users = client.searchForUsers("Kristianne")
-
-
-# users = client.fetchThreadList()
-#print("users' IDs: {}".format([user.uid for user in users]))
-#print("users' names: {}".format([user.name for user in users]))
 
 
 
 class Soppelbot(Client):
 	def onMessage(self, author_id, message_object, thread_id, thread_type, **kwargs):
 		message_list = message_object.text.split()
-		#if(author_id != self.uid):
-		#	self.reactToMessage(message_object.uid, MessageReaction.HEART)
 		time.sleep(1)
 		for word in message_list:
 			word.strip()
+		if((message_list[0].decode('utf-8').lower()) == "help"):
+			self.reactToMessage(message_object.uid, MessageReaction.SMILE)
+			text= "Here are a list of commands:\n\"help\"\n\"add <name> <number>\"\n\"remove <number>\"\n\"print all rooms\"\n\"pls poelser\" " + random.choice(list_of_emojis)
+			self.send(Message(text=text), thread_id=thread_id, thread_type=thread_type)
 		if((message_list[0].decode('utf-8').lower()) == "add"):
 			self.reactToMessage(message_object.uid, MessageReaction.HEART)
 			
@@ -121,7 +120,6 @@ class Soppelbot(Client):
     			thread_type=thread_type,
 			)
 
-
 		else:
             # Sends the data to the inherited onMessage, so that we can still see when a message is recieved
 			super(Soppelbot, self).onMessage(
@@ -131,20 +129,13 @@ class Soppelbot(Client):
 				thread_type=thread_type,
 				**kwargs
             )
-			#client.stopListening()
 
-
-#Starting the bot
-client = Soppelbot('soppelbot@gmail.com', 'Soppel123',)
-thread_id_own = client.uid
-thread_type_own = ThreadType.USER
-#client.setDefaultThread(thread_id, thread_type)
 
 def updateSoppelDag():
 	global day_counter
 	global Room_position
 
-	if(day_counter == daysBetweenEachMsg):
+	if(day_counter == days_between_each_trash_day):
 		while(current_residents[Room_position] == 'away'):
 			Room_position += 1
 			if(Room_position > len(current_residents)-1):
@@ -153,7 +144,7 @@ def updateSoppelDag():
 		day_counter = 0
 		Room_position += 1
 
-		client.send(Message(text=text), thread_id=thread_id, thread_type=thread_type)
+		client.send(Message(text=text), thread_id=main_thread_id, thread_type=main_thread_type)
 
 		if(Room_position > len(current_residents)-1):
 			Room_position = 0
@@ -176,12 +167,16 @@ def updateWashingWeek():
 		washing_list.append(current_residents[Washing_week_position])
 		Washing_week_position += 1
 	text = "The current washing-roster: " + washing_list[0] + ", " + washing_list[1] + " and " + washing_list[2] + ". Remember to wash today " + random.choice(list_of_emojis)
-	client.send(Message(text=text))
+	client.send(Message(text=text), thread_id=main_thread_id, thread_type=main_thread_type)
 	print("Washing_week_position: " + str(Washing_week_position))
 
 
 
-#Main Loop
+
+#Starting the bot
+client = Soppelbot('soppelbot@gmail.com', password.password)
+#client.setDefaultThread(thread_id, thread_type)
+
 
 #schedule.every().day.at("13:00").do(updateSoppelDag)
 #schedule.every(0.1).minutes.do(updateSoppelDag)
@@ -191,6 +186,7 @@ schedule.every().sunday.at("10:00").do(updateWashingWeek)
 schedule.every().day.at("12:00").do(updateSoppelDag)
 
 
+#Main Loop
 while(True):
 	schedule.run_pending()
 	client.setActiveStatus(markAlive=True)
