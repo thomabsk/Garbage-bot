@@ -27,7 +27,7 @@ number_of_rooms = len(current_residents)
 
 
 #Thread to post Garbage/Washing updates in
-main_thread_id = "2604038489700339" #Kollektivchat
+main_thread_id = "1965858186869179" #Kollektivchat
 main_thread_type = ThreadType.GROUP
 
 
